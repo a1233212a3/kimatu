@@ -49,17 +49,50 @@ if (isset($_GET['query'])) {
 <!DOCTYPE html>
 <html>
   <head>
-    <title>画像圧縮</title>
+    <title>bbs</title>
     <meta charset="utf-8">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.0/dist/browser-image-compression.js"></script>
+    <style>
+    @media (max-width: 768px) {
+  input[type="text"], input[type="submit"] {
+    width: 100%;
+  }
+}
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .content {
+  padding: 10px;
+}
+
+form {
+  margin-bottom: 20px;
+}
+img {
+  max-width: 100%;
+  height: auto;
+}
+button, input[type="submit"] {
+  background-color: #007bff;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+}
+</style>
   </head>
   <body>
+  <form method="POST" action="./kimatu2.php" enctype="multipart/form-data">   
+  <textarea name="body"></textarea>
+  <div style="margin: 1em 0;">
+    <input type="file" accept="image/*" name="image" id="imageInput">
+  </div>
+  <button type="submit">送信</button>
     <div class="content">
       <h2>画像圧縮してみる</h2>
-<form method="POST" action="./kimatu2.php" enctype="multipart/form-data">     
- <textarea name="body"></textarea>
-  <div style="margin: 1em 0;">
-    <input type="file" accept="image/*" name="image" id="imageInput" onchange="handleImageUpload(event);">
+    <input type="file" accept="image/*" name="image2" id="imageInput" onchange="handleImageUpload(event);">
   </div>
 <button type="submit">送信</button>
 </form>  
@@ -127,19 +160,11 @@ function handleImageUpload(event) {
       		originalSize.textContent = `元画像のサイズ: ${(imageFile.size / 1024 / 1024).toFixed(2)} MB`;
       		compressedSize.textContent = `圧縮した画像のサイズ: ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`;
 
+            compressedImage.innerHTML += `
+          <a href="${img}" target="_blank">
+            <img src="${img}" width="400" alt="">
+          </a>`
 
-            // 将处理后的文件设置为新的输入框值，以替换原始的文件
-            const newFile = new File([compressedFile], imageFile.name);
-            imageInput.files = [newFile];
-
-            // 创建一个新的 img 元素，用于显示处理后的图像
-            const newImage = document.createElement('img');
-            newImage.src = img;
-            newImage.width = 400;
-            newImage.alt = '';
-
-            // 将新的图像元素添加到页面中
-            compressedImage.appendChild(newImage);
  
     })
     .catch(function (error) {
@@ -161,4 +186,3 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 </script>
-
