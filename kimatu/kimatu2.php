@@ -30,8 +30,26 @@ if (isset($_POST['body'])) {
   header("Location: ./kimatu2.php");
   return;
 }
+// ページ数をURLクエリパラメータから取得。無い場合は1ページ目とみなす
+$page = isset($_GET['page']) ? intval($_GET['page']) : 1;
 
-$select_sth = null;
+// 1ページあたりの行数を決める
+$count_per_page = 10;
+
+// ページ数に応じてスキップする行数を計算
+$skip_count = $count_per_page * ($page - 1);
+
+// hogehogeテーブルの行数を SELECT COUNT で取得
+$count_sth = $dbh->prepare('SELECT COUNT(*) FROM bbs_entries;');
+$count_sth->execute();
+$count_all = $count_sth->fetchColumn();
+if ($skip_count >= $count_all) {
+    // スキップする行数が全行数より多かったらおかしいのでエラーメッセージ表示し終了
+    print('このページは存在しません!');
+    return;
+}
+
+
 if (isset($_GET['query'])) {
   // urlクエリパラメータ query がある場合
   $select_sth = $dbh->prepare('SELECT * FROM bbs_entries WHERE body LIKE :query ORDER BY created_at DESC');
@@ -43,7 +61,7 @@ if (isset($_GET['query'])) {
   // ない場合
   $select_sth = $dbh->prepare('SELECT * FROM bbs_entries ORDER BY created_at DESC');
   $select_sth->execute();
-}1
+}
 ?>
 <!-- フォームのPOST先はこのファイル自身にする -->
 <!DOCTYPE html>
@@ -116,6 +134,26 @@ button, input[type="submit"] {
   <a href="./kimatu2.php">検索解除</a>
 <?php endif; ?>
 <hr>
+
+<div style="width: 100%; text-align: center; padding-bottom: 1em; border-bottom: 1px solid #ccc; margin-bottom: 0.5em">
+  <?= $page ?>ページ目
+  (全 <?= floor($count_all / $count_per_page) + 1 ?>ページ中)
+
+  <div style="display: flex; justify-content: space-between; margin-bottom: 2em;">
+    <div>
+      <?php if($page > 1): // 前のページがあれば表示 ?>
+        <a href="?page=<?= $page - 1 ?>">前のページ</a>
+      <?php endif; ?>
+    </div>
+    <div>
+      <?php if($count_all > $page * $count_per_page): // 次のページがあれば表示 ?>
+        <a href="?page=<?= $page + 1 ?>">次のページ</a>
+      <?php endif; ?>
+    </div>
+  </div>
+</div>
+
+
 <?php foreach($select_sth as $entry): ?>
   <dl style="margin-bottom: 1em; padding-bottom: 1em; border-bottom: 1px solid #ccc;">
     <dt>ID</dt>
